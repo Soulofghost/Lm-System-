@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Library Management System Preview</title>
+    <style>
+        :root { --primary:#003f8f; --accent:#0a58ca; --bg:#008080; --line:#777; --face:#c0c0c0; --paper:#fff8dc; }
+        * { box-sizing: border-box; }
+        body { margin:0; font-family: Tahoma, "MS Sans Serif", Arial, sans-serif; background:var(--bg); color:#111; font-size:14px; }
+        body:before { content:""; position:fixed; inset:0; pointer-events:none; background:linear-gradient(45deg, #ffffff12 25%, transparent 25%, transparent 75%, #00000010 75%), linear-gradient(45deg, #00000010 25%, transparent 25%, transparent 75%, #ffffff12 75%); background-position:0 0, 8px 8px; background-size:16px 16px; opacity:.35; }
+        .login { min-height:100vh; display:grid; place-items:center; padding:24px; }
+        .login-card, .panel, .card, .desktop-window { background:var(--face); border:2px solid; border-color:#fff #404040 #404040 #fff; box-shadow:2px 2px 0 #0006; border-radius:0; }
+        .login-card { width:min(430px,100%); padding:0; }
+        .window-title { background:linear-gradient(90deg,#001f6d,#0b63ce); color:#fff; padding:6px 8px; font-weight:700; display:flex; align-items:center; justify-content:space-between; min-height:28px; }
+        .window-title .controls span { display:inline-grid; place-items:center; width:18px; height:18px; margin-left:3px; background:var(--face); color:#111; border:2px solid; border-color:#fff #404040 #404040 #fff; font-size:11px; }
+        .window-body { padding:18px; }
+        input, select, textarea, button { font:inherit; }
+        input, select, textarea { width:100%; padding:7px 8px; border:2px solid; border-color:#404040 #fff #fff #404040; border-radius:0; margin-top:5px; background:#fff; }
+        label { display:block; margin:12px 0; font-weight:600; }
+        button { border:2px solid; border-color:#fff #404040 #404040 #fff; border-radius:0; padding:7px 12px; cursor:pointer; background:var(--face); color:#111; box-shadow:1px 1px 0 #0003; }
+        button:active { border-color:#404040 #fff #fff #404040; box-shadow:none; transform:translate(1px,1px); }
+        .btn, .btn-light, .btn-danger, .btn-outline { background:var(--face); color:#111; }
+        .btn-danger { color:#7b0000; font-weight:700; }
+        .app { display:none; min-height:100vh; padding:18px; gap:12px; position:relative; }
+        .sidebar { width:250px; background:var(--face); color:#111; padding:0; border:2px solid; border-color:#fff #404040 #404040 #fff; box-shadow:2px 2px 0 #0005; align-self:flex-start; }
+        .brand { font-size:18px; font-weight:800; padding:12px; border-bottom:2px solid #808080; background:#d8d8d8; }
+        .nav { padding:8px; }
+        .nav button { display:block; width:100%; margin:3px 0; text-align:left; background:var(--face); color:#111; opacity:1; }
+        .nav button.active, .nav button:hover { background:#001f6d; color:#fff; }
+        .main { flex:1; min-width:0; }
+        .main-window { background:var(--face); border:2px solid; border-color:#fff #404040 #404040 #fff; box-shadow:2px 2px 0 #0006; min-height:calc(100vh - 36px); display:flex; flex-direction:column; }
+        .menubar { background:#d8d8d8; border-bottom:1px solid #808080; padding:4px 8px; display:flex; gap:18px; font-size:13px; }
+        .topbar { background:#efefef; border-bottom:2px solid #808080; padding:10px 12px; display:flex; justify-content:space-between; gap:12px; align-items:center; }
+        .content { padding:14px; flex:1; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; }
+        .card { padding:14px; cursor:pointer; min-height:120px; background:#d7d7d7; }
+        .card:hover { background:#e8e8e8; }
+        .card h3 { margin:0 0 8px; color:#001f6d; }
+        .panel { padding:12px; overflow:auto; background:#d7d7d7; }
+        .row { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+        table { width:100%; border-collapse:collapse; margin-top:12px; background:#fff; border:2px solid; border-color:#404040 #fff #fff #404040; }
+        th, td { padding:7px 8px; border:1px solid #999; text-align:left; vertical-align:top; }
+        th { background:#001f6d; color:#fff; font-weight:700; }
+        tr:nth-child(even) td { background:#fffdf0; }
+        .actions { display:flex; gap:6px; flex-wrap:wrap; }
+        .alert { margin:10px 0; padding:8px 10px; border:2px solid; border-color:#404040 #fff #fff #404040; background:#fff8dc; color:#111; display:none; }
+        .muted { color:#3f3f3f; }
+        .toolbar { display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+        .statusbar { border-top:2px solid #808080; padding:5px 8px; background:#d8d8d8; display:flex; justify-content:space-between; gap:12px; font-size:12px; }
+        .stamp { border:2px solid; border-color:#404040 #fff #fff #404040; padding:5px 8px; background:var(--paper); display:inline-block; font-weight:700; color:#5a2d00; }
+        @media (max-width: 800px) { .app { display:none; flex-direction:column; } .sidebar { width:100%; } .nav { display:grid; grid-template-columns:repeat(2,1fr); gap:4px; } .main-window { min-height:auto; } }
+    </style>
+</head>
+<body>
+<section class="login" id="loginView">
+    <form class="login-card" id="loginForm">
+        <div class="window-title"><span>LIBRARY.EXE - Staff Login</span><span class="controls"><span>_</span><span>x</span></span></div>
+        <div class="window-body">
+            <span class="stamp">CLASSICAL LIBRARY MANAGEMENT SYSTEM</span>
+            <p class="muted">Preview login: admin / admin123</p>
+            <div class="alert" id="loginAlert" style="background:#fff8dc;color:#7b0000"></div>
+            <label>Username <input id="username" required></label>
+            <label>Password <input id="password" type="password" required></label>
+            <button class="btn" style="width:100%">Login</button>
+        </div>
+    </form>
+</section>
+
+<section class="app" id="appView">
+    <aside class="sidebar">
+        <div class="brand">LMS Preview</div>
+        <div class="nav" id="nav"></div>
+    </aside>
+    <main class="main">
+        <div class="main-window">
+            <div class="window-title"><span id="title">Dashboard</span><span class="controls"><span>_</span><span>[]</span><span>x</span></span></div>
+            <div class="menubar"><span>File</span><span>Records</span><span>Circulation</span><span>Reports</span><span>Help</span></div>
+            <div class="topbar">
+                <div><strong>Central Library Desk</strong><div class="muted">Browser preview using local storage</div></div>
+                <button class="btn-danger" onclick="logout()">Logout</button>
+            </div>
+            <div class="content" id="content"></div>
+            <div class="statusbar"><span>Ready</span><span>Fine rule: 14 days, $1/day</span></div>
+        </div>
+    </main>
+</section>
+
+<script>
+const modules = [
+    ['dashboard','Dashboard'], ['categories','Categories'], ['authors','Authors'], ['publishers','Publishers'],
+    ['books','Books'], ['members','Members'], ['issue','Issue Book'], ['return','Return Book']
+];
+const defaultData = {
+    categories:[{id:1,name:'Fiction',description:'Fictional books and novels'},{id:2,name:'Science',description:'Science and research books'}],
+    authors:[{id:1,name:'George Orwell',email:'orwell@example.com',phone:'',biography:''}],
+    publishers:[{id:1,name:'Penguin Books',email:'contact@penguin.example',phone:'',address:''}],
+    books:[{id:1,title:'1984',isbn:'9780451524935',categoryId:1,authorId:1,publisherId:1,edition:'1st',publicationYear:1949,totalCopies:3,availableCopies:3,shelfLocation:'A1'}],
+    members:[{id:1,memberCode:'M001',fullName:'Demo Member',email:'member@example.com',phone:'',address:'',membershipDate:new Date().toISOString().slice(0,10),active:true}],
+    issues:[]
+};
+let db = JSON.parse(localStorage.getItem('lmsPreview') || 'null') || defaultData;
+let active = 'dashboard';
+
+document.getElementById('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if (username.value === 'admin' && password.value === 'admin123') {
+        sessionStorage.setItem('lmsPreviewLoggedIn','yes');
+        showApp();
+    } else {
+        loginAlert.style.display = 'block';
+        loginAlert.textContent = 'Invalid username or password.';
+    }
+});
+
+function save(){ localStorage.setItem('lmsPreview', JSON.stringify(db)); }
+function showApp(){
+    loginView.style.display = 'none';
+    appView.style.display = 'flex';
+    nav.innerHTML = modules.map(([key,label]) => `<button class="${key===active?'active':''}" onclick="go('${key}')">${label}</button>`).join('');
+    render();
+}
+function logout(){ sessionStorage.removeItem('lmsPreviewLoggedIn'); location.reload(); }
+function go(key){ active = key; showApp(); }
+function render(){
+    title.textContent = modules.find(m => m[0]===active)[1];
+    if (active === 'dashboard') return dashboard();
+    if (active === 'issue') return issuePage();
+    if (active === 'return') return returnPage();
+    crudPage(active);
+}
+function dashboard(){
+    content.innerHTML = `<h1>Welcome to the Library Dashboard</h1><p class="muted">Choose a module to begin.</p><div class="grid">${
+        modules.filter(m=>m[0]!=='dashboard').map(([key,label]) => `<div class="card" onclick="go('${key}')"><h3>${label}</h3><p class="muted">Open ${label.toLowerCase()} module.</p></div>`).join('')
+    }</div>`;
+}
+function fields(type, item={}){
+    const opts = {
+        categories:[['name','Category Name'],['description','Description']],
+        authors:[['name','Author Name'],['email','Email'],['phone','Phone'],['biography','Biography']],
+        publishers:[['name','Publisher Name'],['email','Email'],['phone','Phone'],['address','Address']],
+        members:[['memberCode','Member ID'],['fullName','Full Name'],['email','Email'],['phone','Phone'],['address','Address'],['membershipDate','Membership Date','date']],
+        books:[['title','Title'],['isbn','ISBN'],['categoryId','Category','select:categories'],['authorId','Author','select:authors'],['publisherId','Publisher','select:publishers'],['edition','Edition'],['publicationYear','Publication Year','number'],['totalCopies','Total Copies','number'],['availableCopies','Available Copies','number'],['shelfLocation','Shelf Location']]
+    }[type];
+    return opts.map(([name,label,kind]) => {
+        if (kind && kind.startsWith('select:')) {
+            const source = kind.split(':')[1];
+            return `<label>${label}<select name="${name}" required>${db[source].map(x=>`<option value="${x.id}" ${String(item[name])===String(x.id)?'selected':''}>${x.name || x.fullName || x.title}</option>`).join('')}</select></label>`;
+        }
+        return `<label>${label}<input name="${name}" type="${kind||'text'}" value="${item[name] ?? ''}" ${['name','title','memberCode','fullName'].includes(name)?'required':''}></label>`;
+    }).join('') + (type==='members' ? `<label><input name="active" type="checkbox" ${item.active!==false?'checked':''} style="width:auto"> Active</label>` : '');
+}
+function crudPage(type){
+    const labels = {categories:'Category',authors:'Author',publishers:'Publisher',books:'Book',members:'Member'};
+    content.innerHTML = `<div class="toolbar"><h1>${labels[type]} Management</h1><input id="search" placeholder="Search records" oninput="drawTable('${type}')" style="max-width:260px"></div>
+    <div class="panel"><form id="form" class="row">${fields(type)}<div><button class="btn">Save</button></div></form><div class="alert" id="ok">Saved.</div><div id="table"></div></div>`;
+    form.onsubmit = e => {
+        e.preventDefault();
+        const item = Object.fromEntries(new FormData(form).entries());
+        item.id = Number(form.dataset.id || nextId(type));
+        if (type === 'members') item.active = form.active.checked;
+        ['categoryId','authorId','publisherId','publicationYear','totalCopies','availableCopies'].forEach(k => { if(item[k]) item[k]=Number(item[k]); });
+        const index = db[type].findIndex(x => x.id === item.id);
+        index >= 0 ? db[type][index] = item : db[type].push(item);
+        form.reset(); delete form.dataset.id; save(); ok.style.display='block'; drawTable(type);
+    };
+    drawTable(type);
+}
+function drawTable(type){
+    const q = (document.getElementById('search')?.value || '').toLowerCase();
+    const rows = db[type].filter(x => JSON.stringify(x).toLowerCase().includes(q));
+    table.innerHTML = `<table><thead><tr>${Object.keys(rows[0] || {id:'',name:''}).map(k=>`<th>${k}</th>`).join('')}<th>Actions</th></tr></thead><tbody>${
+        rows.map(row => `<tr>${Object.keys(row).map(k=>`<td>${display(k,row[k])}</td>`).join('')}<td class="actions"><button class="btn-light" onclick="edit('${type}',${row.id})">Edit</button><button class="btn-danger" onclick="del('${type}',${row.id})">Delete</button></td></tr>`).join('')
+    }</tbody></table>`;
+}
+function display(k,v){
+    if (k==='categoryId') return lookup('categories',v);
+    if (k==='authorId') return lookup('authors',v);
+    if (k==='publisherId') return lookup('publishers',v);
+    return v;
+}
+function lookup(type,id){ const x = db[type].find(i => i.id == id); return x ? (x.name || x.title || x.fullName) : ''; }
+function edit(type,id){ const item = db[type].find(x=>x.id===id); form.dataset.id=id; form.innerHTML = fields(type,item) + '<div><button class="btn">Update</button></div>'; }
+function del(type,id){ if(confirm('Delete this record?')){ db[type]=db[type].filter(x=>x.id!==id); save(); drawTable(type); } }
+function issuePage(){
+    content.innerHTML = `<h1>Issue Book</h1><div class="panel"><form id="issueForm" class="row">
+    <label>Member ID<select name="memberId">${db.members.filter(m=>m.active).map(m=>`<option value="${m.id}">${m.memberCode} - ${m.fullName}</option>`)}</select></label>
+    <label>Book ID<select name="bookId">${db.books.filter(b=>b.availableCopies>0).map(b=>`<option value="${b.id}">${b.id} - ${b.title} (${b.availableCopies} available)</option>`)}</select></label>
+    <label>Issue Date<input type="date" name="issueDate" value="${today()}"></label><div><button class="btn">Issue Book</button></div></form><div id="table"></div></div>`;
+    issueForm.onsubmit = e => { e.preventDefault(); const p=Object.fromEntries(new FormData(issueForm).entries()); const book=db.books.find(b=>b.id==p.bookId); book.availableCopies--; db.issues.push({id:nextId('issues'),bookId:Number(p.bookId),memberId:Number(p.memberId),issueDate:p.issueDate,dueDate:addDays(p.issueDate,14),returnDate:'',daysKept:0,fineAmount:0,status:'ISSUED'}); save(); issuePage(); };
+    issueTable(db.issues);
+}
+function returnPage(){
+    const open = db.issues.filter(i=>i.status==='ISSUED');
+    content.innerHTML = `<h1>Return Book</h1><div class="panel"><form id="returnForm" class="row">
+    <label>Issued Record<select name="issueId">${open.map(i=>`<option value="${i.id}">#${i.id} - ${lookup('books',i.bookId)} to ${lookup('members',i.memberId)}</option>`)}</select></label>
+    <label>Return Date<input type="date" name="returnDate" value="${today()}"></label><div><button class="btn">Return Book</button></div></form><div id="table"></div></div>`;
+    returnForm.onsubmit = e => { e.preventDefault(); const p=Object.fromEntries(new FormData(returnForm).entries()); const i=db.issues.find(x=>x.id==p.issueId); const days=diffDays(i.issueDate,p.returnDate); const late=Math.max(0,diffDays(i.dueDate,p.returnDate)); Object.assign(i,{returnDate:p.returnDate,daysKept:days,fineAmount:late,status:'RETURNED'}); db.books.find(b=>b.id===i.bookId).availableCopies++; save(); returnPage(); };
+    issueTable(open);
+}
+function issueTable(rows){
+    table.innerHTML = `<table><thead><tr><th>Issue ID</th><th>Member</th><th>Book</th><th>Issue Date</th><th>Due Date</th><th>Return Date</th><th>Days</th><th>Fine</th><th>Status</th></tr></thead><tbody>${
+        rows.map(i=>`<tr><td>${i.id}</td><td>${lookup('members',i.memberId)}</td><td>${lookup('books',i.bookId)}</td><td>${i.issueDate}</td><td>${i.dueDate}</td><td>${i.returnDate}</td><td>${i.daysKept}</td><td>$${Number(i.fineAmount).toFixed(2)}</td><td>${i.status}</td></tr>`).join('')
+    }</tbody></table>`;
+}
+function nextId(type){ return Math.max(0,...db[type].map(x=>x.id))+1; }
+function today(){ return new Date().toISOString().slice(0,10); }
+function addDays(date,days){ const d=new Date(date); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
+function diffDays(a,b){ return Math.max(0, Math.round((new Date(b)-new Date(a))/86400000)); }
+if (sessionStorage.getItem('lmsPreviewLoggedIn')) showApp();
+</script>
+</body>
+</html>

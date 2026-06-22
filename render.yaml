@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: library-management-system
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_USERNAME
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: LMS_ADMIN_USERNAME
+        value: admin
+      - key: LMS_ADMIN_PASSWORD
+        sync: false
+      - key: LMS_ADMIN_NAME
+        value: System Administrator
